@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
-import exrpess from 'express';
-const app = exrpess();
+import express from 'express';
+const app = express();
 app.use(express.json());
 
 import bookRouter from './routes/books.js';
