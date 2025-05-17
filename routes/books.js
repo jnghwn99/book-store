@@ -3,13 +3,10 @@ const router = express.Router();
 router.use(express.json());
 export default router;
 
-router.get('/', (req, res) => {
-  res.json('책 목록');
-});
-router.get('/', (req, res) => {
-  res.json('카테고리별 도서 조회');
-});
+import { bookList, bookDetail } from '../controller/BookController.js';
 
-router.get('/:id', (req, res) => {
-  res.json('책 상세');
-});
+// 전체 도서 조회
+router.get('/', bookList);
+
+// 개별 도서 조회
+router.get('/:id', bookDetail);
