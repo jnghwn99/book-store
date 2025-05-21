@@ -1,10 +1,7 @@
 import conn from '../mariadb.js';
 import { StatusCodes } from 'http-status-codes';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
-export const categoryList = (req, res) => {
+export const getCategory = (req, res) => {
   const sql = 'SELECT * FROM categories';
   const values = [];
 

@@ -66,7 +66,7 @@ export const login = (req, res) => {
   });
 };
 
-export const passwordResetRequest = (req, res) => {
+export const requestPasswordReset = (req, res) => {
   const { email } = req.body;
   const sql = 'SELECT * FROM users WHERE email = ?';
   const values = [email];
@@ -90,7 +90,7 @@ export const passwordResetRequest = (req, res) => {
   });
 };
 
-export const passwordReset = (req, res) => {
+export function updateUserPassword(req, res) {
   const { email, password } = req.body;
 
   const salt = crypto.randomBytes(10).toString('base64');
@@ -116,4 +116,4 @@ export const passwordReset = (req, res) => {
       });
     }
   });
-};
+}

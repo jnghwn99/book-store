@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# webstrom settings
+.idea/
+
+# http request files
+*.http

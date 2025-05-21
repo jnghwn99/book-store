@@ -1,14 +1,12 @@
 import conn from '../mariadb.js';
 import { StatusCodes } from 'http-status-codes';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 export const bookList = (req, res) => {
   const { limit, page, category_id, new_released } = req.query;
   const offset = limit * (page - 1);
 
-  let sql = 'SELECT * FROM books';
+  let sql =
+    'SELECT *, (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes FROM books';
   let values = [];
 
   if (category_id && new_released) {
@@ -40,13 +38,17 @@ export const bookList = (req, res) => {
 };
 
 export const bookDetail = (req, res) => {
+  const { user_id } = req.body;
   const { id } = req.params;
-  const sql = `SELECT books.*, categories.name AS category_name
+  const sql = `SELECT books.*, 
+    (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes,
+    (SELECT EXISTS (SELECT * FROM likes WHERE user_id = ? AND book_id = ?)) AS is_liked,
+    categories.name AS category_name
     FROM books
     LEFT JOIN categories 
     ON books.category_id = categories.id 
     WHERE books.id = ?`;
-  const values = [id];
+  const values = [user_id, id, id];
 
   conn.query(sql, values, (err, result) => {
     if (err) {

@@ -6,8 +6,8 @@ export default router;
 import {
   join,
   login,
-  passwordResetRequest,
-  passwordReset,
+  requestPasswordReset,
+  updateUserPassword,
 } from '../controller/UserController.js';
 
 // 회원가입
@@ -17,4 +17,4 @@ router.post('/join', join);
 router.post('/login', login);
 
 // password reset
-router.post('/reset', passwordResetRequest).put('/reset', passwordReset);
+router.post('/reset', requestPasswordReset).put('/reset', updateUserPassword);

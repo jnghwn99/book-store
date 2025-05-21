@@ -3,9 +3,7 @@ const router = express.Router();
 router.use(express.json());
 export default router;
 
-router.post('/:id', (req, res) => {
-  res.json('좋아요 추가');
-});
-router.delete('/:id', (req, res) => {
-  res.json('좋아요 삭제');
-});
+import { addLike, deleteLike } from '../controller/LikeController.js';
+
+router.post('/:id', addLike);
+router.delete('/:id', deleteLike);
