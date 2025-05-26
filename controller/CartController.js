@@ -9,18 +9,16 @@ export const getCartItem = (req, res) => {
   const values = [user_id, selected];
 
   conn.query(sql, values, (err, result) => {
-    conn.query(sql, values, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(StatusCodes.BAD_REQUEST).end();
-      }
-      if (result.length > 0) {
-        console.log(result);
-        return res.status(StatusCodes.OK).json(result);
-      } else {
-        return res.status(StatusCodes.NOT_FOUND).end();
-      }
-    });
+    if (err) {
+      console.error(err);
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    if (result.length > 0) {
+      console.log(result);
+      return res.status(StatusCodes.OK).json(result);
+    } else {
+      return res.status(StatusCodes.NOT_FOUND).end();
+    }
   });
 };
 

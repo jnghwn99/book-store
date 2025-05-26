@@ -10,7 +10,7 @@ export const getCategory = (req, res) => {
       console.error(err);
       return res.status(StatusCodes.BAD_REQUEST).end();
     }
-    if (result.length > 0) {
+    if (Array.isArray(result) && result.length > 0) {
       console.log(result);
       return res.status(StatusCodes.OK).json(result);
     } else {
