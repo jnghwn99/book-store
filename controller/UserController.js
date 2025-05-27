@@ -44,11 +44,13 @@ export const login = (req, res) => {
     if (user && hashedPassword == user.password) {
       const token = jwt.sign(
         {
+          id: user.id,
           email: user.email,
         },
         process.env.PRIVATE_KEY,
         {
-          expiresIn: '1h',
+          expiresIn: '12h',
+          issuer: 'admin',
         },
       );
       res.cookie('token', token, { httpOnly: true });

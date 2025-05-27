@@ -2,20 +2,22 @@ import conn from '../mariadb.js';
 import { StatusCodes } from 'http-status-codes';
 
 export const bookList = (req, res) => {
+  let allBooksRes = {};
+
   const { limit, page, category_id, new_released } = req.query;
   const offset = limit * (page - 1);
 
   let sql =
-    'SELECT *, (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes FROM books';
+    'SELECT SQL_CALC_FOUND_ROWS *, (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes FROM books';
   let values = [];
 
   if (category_id && new_released) {
     sql +=
       ' WHERE category_id = ? AND published_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
-    values.push(category_id);
+    values = [category_id];
   } else if (category_id) {
     sql += ' WHERE category_id = ?';
-    values.push(category_id);
+    values = [category_id];
   } else if (new_released) {
     sql +=
       ' WHERE published_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
@@ -26,11 +28,31 @@ export const bookList = (req, res) => {
   conn.query(sql, values, (err, result) => {
     if (err) {
       console.error(err);
-      return res.status(StatusCodes.BAD_REQUEST).end();
+      // return res.status(StatusCodes.BAD_REQUEST).end();
     }
     if (result.length > 0) {
       console.log(result);
-      return res.status(StatusCodes.OK).json(result);
+      allBooksRes.books = result;
+    } else {
+      console.log('No books found');
+      return res.status(StatusCodes.NOT_FOUND).end();
+    }
+  });
+
+  sql = 'SELECT found_rows()';
+  conn.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(StatusCodes.BAD_REQUEST).end();
+    }
+    if (result) {
+      console.log(result);
+
+      let pagination = {};
+      pagination.totalCount = result[0]['found_rows()'];
+      pagination.currentPage = page;
+      allBooksRes.pagination = pagination;
+      return res.status(StatusCodes.OK).json(allBooksRes);
     } else {
       return res.status(StatusCodes.NOT_FOUND).end();
     }

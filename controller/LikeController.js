@@ -1,12 +1,16 @@
 import conn from '../mariadb.js';
 import { StatusCodes } from 'http-status-codes';
+import { decodeJwt } from '../auth.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const addLike = (req, res) => {
-  const { user_id } = req.body;
-  const { id } = req.params;
+  const book_id = req.params.id;
+
+  const decodedJwt = decodeJwt(req);
 
   const sql = 'INSERT INTO likes (user_id, book_id) VALUES (?, ?)';
-  const values = [user_id, id];
+  const values = [decodedJwt.id, book_id];
 
   conn.query(sql, values, (err, result) => {
     if (err) {
@@ -24,9 +28,11 @@ export const addLike = (req, res) => {
 };
 
 export const deleteLike = (req, res) => {
-  const sql = 'DELETE FROM likes WHERE user_id = ? AND book_id = ?';
-  const values = [req.body.user_id, req.params.id];
+  const book_id = req.params.id;
+  const decodedJwt = decodeJwt(req);
 
+  const sql = 'DELETE FROM likes WHERE user_id = ? AND book_id = ?';
+  const values = [decodedJwt.id, book_id];
   conn.query(sql, values, (err, result) => {
     if (err) {
       console.error(err);
