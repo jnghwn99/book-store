@@ -15,7 +15,8 @@ export const getCartItem = (req, res) => {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: 'Invalid token' });
-  } else {
+  }
+  try {
     let sql = `SELECT cartItems.id, book_id, title, summary, quantity, price FROM cartItems
             LEFT JOIN books ON cartItems.book_id = books.id
             WHERE user_id = ?`;
@@ -39,6 +40,11 @@ export const getCartItem = (req, res) => {
         return res.status(StatusCodes.NOT_FOUND).end();
       }
     });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Internal Server Error, 에러입니다.' });
   }
 };
 

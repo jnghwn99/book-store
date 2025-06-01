@@ -60,8 +60,44 @@ export const bookList = (req, res) => {
 };
 
 export const bookDetail = (req, res) => {
-  const { user_id } = req.body;
-  const { id } = req.params;
+  const auth = decodeJwt(req, res);
+  if (auth instanceof jwt.TokenExpiredError) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: 'Unauthorized' });
+  }
+  if (auth instanceof jwt.JsonWebTokenError) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: 'Invalid token' });
+  }
+  if (auth instanceof ReferenceError) {
+    const conn = db();
+    const bookListSql = `SELECT books.*, 
+    (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes,
+    categories.name AS category_name
+    FROM books
+    LEFT JOIN categories 
+    ON books.category_id = categories.id 
+    WHERE books.id = ?`;
+    const bookListValue = [bookId];
+
+    conn.query(bookListSql, bookListValue, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+      }
+      if (result[0]) {
+        console.log(result);
+        return res.status(StatusCodes.OK).json(result[0]);
+      } else {
+        return res.status(StatusCodes.NOT_FOUND).end();
+      }
+    });
+  }
+
+  const conn = db();
+  const { id: bookId } = req.params;
   const sql = `SELECT books.*, 
     (SELECT count(*) FROM likes WHERE book_id = books.id ) AS likes,
     (SELECT EXISTS (SELECT * FROM likes WHERE user_id = ? AND book_id = ?)) AS is_liked,
@@ -70,7 +106,7 @@ export const bookDetail = (req, res) => {
     LEFT JOIN categories 
     ON books.category_id = categories.id 
     WHERE books.id = ?`;
-  const values = [user_id, id, id];
+  const values = [auth.id, bookId, bookId];
 
   conn.query(sql, values, (err, result) => {
     if (err) {

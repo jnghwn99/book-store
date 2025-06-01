@@ -1,4 +1,4 @@
-import mysql from 'mysql2/promise';
+import conn from '../mariadb.js';
 
 import { StatusCodes } from 'http-status-codes';
 import { decodeJwt } from '../auth.js';
@@ -18,16 +18,6 @@ export const order = async (req, res) => {
   }
 
   try {
-    const conn = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'root',
-      port: 3306,
-      timezone: '+09:00',
-      database: 'book-store',
-      dateStrings: true,
-    });
-
     const { items, delivery, totalQuantity, totalPrice, firstBookTitle } =
       req.body;
 
@@ -66,7 +56,6 @@ export const order = async (req, res) => {
       item.book_id,
       item.quantity,
     ]);
-
     await conn.query(orderBookListSql, [orderBookListValues]);
     let result = await deleteCartItems(conn, items);
 
@@ -74,7 +63,7 @@ export const order = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: 'Error Catched ㅎㅎ',
+      message: 'Error Catched, 에러가 발생했습니다.',
     });
   }
 };
@@ -100,24 +89,22 @@ export const getOrderList = async (req, res) => {
 
 export const getOrderById = async (req, res) => {
   const { id: orderId } = req.params;
-  const conn = await mariadb.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    port: 3306,
-    timezone: '+09:00',
-    database: 'book-store',
-    dateStrings: true,
-  });
 
-  const sql = `SELECT book_id, title, author, price, quantity
+  try {
+    const sql = `SELECT book_id, title, author, price, quantity
                 FROM order_book_list LEFT JOIN books ON order_book_list.book_id = books.id
                 WHERE order_id = ?`;
-  const values = [orderId];
+    const values = [orderId];
 
-  let [rows, fields] = await conn.query(sql, values);
+    let [rows, fields] = await conn.query(sql, values);
 
-  return res.status(StatusCodes.OK).json({
-    orders: rows,
-  });
+    return res.status(StatusCodes.OK).json({
+      orders: rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: 'Error Catched, 에러가 발생했습니다.',
+    });
+  }
 };
